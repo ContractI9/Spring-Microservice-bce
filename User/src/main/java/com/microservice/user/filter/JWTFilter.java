@@ -1,0 +1,90 @@
+package com.microservice.user.filter;
+
+import java.io.IOException;
+
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import com.microservice.user.control.UserDetailsServiceImpl;
+import com.microservice.user.exception.UpdatedRoleException;
+import com.microservice.user.utility.JWTUtility;
+
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.SignatureException;
+import lombok.extern.slf4j.Slf4j;
+
+@Component
+@Slf4j
+public class JWTFilter extends OncePerRequestFilter{
+	@Autowired
+	private JWTUtility jwtUtility;
+	@Autowired
+	private UserDetailsServiceImpl userDetailsServiceImpl;
+	
+
+	@Override
+	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+			throws ServletException, IOException {
+		String authorization= request.getHeader("Authorization");
+		 String token = null;
+	        String userName = null;
+
+	        if(null != authorization && authorization.startsWith("Bearer ")) {
+	            token = authorization.substring(7);
+	            try {
+					userName = jwtUtility.getUsernameFromToken(token);
+				} catch (IllegalArgumentException e) {
+					logger.info("Unable to get JWT Token");
+				} catch (ExpiredJwtException e) {
+					logger.info("JWT Token has expired");
+				}catch (SignatureException e) {
+					logger.info("invalid token : incorrect signature");
+				
+				}
+	        }
+	        if(null != userName && SecurityContextHolder.getContext().getAuthentication() == null) {
+	            UserDetails userDetails
+	                    = userDetailsServiceImpl.loadUserByUsername(userName);
+	        
+	            if(jwtUtility.validateToken(token,userDetails)) {
+	            	int id = (int) jwtUtility.getIdfromToken(token);
+	            	boolean isValid=false;
+	            	 try {
+	            		isValid=userDetailsServiceImpl.checkChangedRoles(id);
+	 				} catch (UpdatedRoleException e) {
+	 					logger.info("You no longer have access to this resource");
+	 				}
+	            	 if(isValid){
+	                UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken
+	                        = new UsernamePasswordAuthenticationToken(userDetails,
+	                        null, userDetails.getAuthorities());
+
+	                usernamePasswordAuthenticationToken.setDetails(
+	                        new WebAuthenticationDetailsSource().buildDetails(request)
+	                );
+
+	                SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+	            	 } else 
+	 	            	response.setStatus(401);
+	            	 }
+	            else 
+	            	response.setStatus(401);
+
+	        }
+
+	       
+	        filterChain.doFilter(request, response);
+		
+	}
+
+}
