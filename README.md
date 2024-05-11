@@ -32,6 +32,129 @@ The project is organized into several key folders, each serving a specific purpo
 
 - **specification**: Contains a file for building queries with operations like `LIKE`, `NOT LIKE`, etc. The specification file provides a reusable mechanism for constructing dynamic queries based on user-defined criteria.
 
+- ## API Endpoints
+
+### Get All Users
+- **URL:** `/test/users`
+- **Method:** `GET`
+- **Authorization:** Requires `ADMIN` role
+- **Description:** Retrieves a list of all users based on search criteria.
+- **Request Body:** 
+  - `List<SearchCriteria>`: List of search criteria to filter users (optional)
+- **Response Body:** 
+  - `List<UserDto>`: List of user data transfer objects (DTOs)
+  
+### Create User
+- **URL:** `/test/createuser`
+- **Method:** `POST`
+- **Authorization:** Requires no authentication
+- **Description:** Creates a new user.
+- **Request Parameters:** 
+  - `userPassword` (optional): User's password
+- **Request Body:** 
+  - `UserDto`: User data transfer object (DTO) containing user details
+- **Response Body:** 
+  - `UserDto`: User data transfer object (DTO) of the created user
+  
+### Hello
+- **URL:** `/test/hello`
+- **Method:** `GET`
+- **Authorization:** Requires no authentication
+- **Description:** A simple test endpoint to check server availability.
+- **Response:** Returns an HTTP 200 OK response.
+
+### Update User
+- **URL:** `/test/users/{id}`
+- **Method:** `PUT`
+- **Authorization:** Requires `ADMIN` role
+- **Description:** Updates an existing user.
+- **Path Parameters:** 
+  - `id`: ID of the user to be updated
+- **Request Parameters:** 
+  - `userPassword` (optional): User's password
+- **Request Body:** 
+  - `UserDto`: User data transfer object (DTO) containing updated user details
+- **Response Body:** 
+  - `UserDto`: User data transfer object (DTO) of the updated user
+  
+### Get User Orders
+- **URL:** `/test/users/{id}/orders`
+- **Method:** `GET`
+- **Authorization:** Requires authentication
+- **Description:** Retrieves orders associated with a specific user.
+- **Path Parameters:** 
+  - `id`: ID of the user
+- **Response Body:** 
+  - `List<OrderDto>`: List of order data transfer objects (DTOs) associated with the user
+  
+### Get User By ID
+- **URL:** `/test/users/{id}`
+- **Method:** `GET`
+- **Authorization:** Requires authentication
+- **Description:** Retrieves user details by ID.
+- **Path Parameters:** 
+  - `id`: ID of the user
+- **Response Body:** 
+  - `UserDto`: User data transfer object (DTO) of the requested user
+  
+### Delete User
+- **URL:** `/test/users/{id}`
+- **Method:** `DELETE`
+- **Authorization:** Requires authentication
+- **Description:** Deletes a user by ID.
+- **Path Parameters:** 
+  - `id`: ID of the user
+- **Response:** Returns an HTTP 200 OK response.
+
+### Filter Order
+- **URL:** `/test/filterorder`
+- **Method:** `POST`
+- **Authorization:** Requires authentication
+- **Description:** Filters orders based on provided criteria.
+- **Request Body:** 
+  - `List<SearchCriteria>`: List of search criteria to filter orders
+- **Response Body:** 
+  - `List<OrderDto>`: List of order data transfer objects (DTOs) matching the filter criteria
+  
+### Authenticate User
+- **URL:** `/test/authenticate`
+- **Method:** `POST`
+- **Authorization:** Requires no authentication
+- **Description:** Authenticates a user and generates a JWT token.
+- **Request Body:** 
+  - `JWTRequest`: Request containing username and password
+- **Response Body:** 
+  - `JWTResponse`: Response containing JWT token
+  
+### Save Role
+- **URL:** `/test/addrole`
+- **Method:** `POST`
+- **Authorization:** Requires no authentication
+- **Description:** Adds a new role.
+- **Request Body:** 
+  - `RoleDto`: Role data transfer object (DTO) containing role details
+- **Response:** Returns a success message.
+
+### Assign Role
+- **URL:** `/test/assignrole`
+- **Method:** `POST`
+- **Authorization:** Requires no authentication
+- **Description:** Assigns a role to a user.
+- **Request Body:** 
+  - `AssignRoleDto`: Request containing role and username
+- **Response:** Returns a success message.
+
+### Delete Role
+- **URL:** `/test/deleterole`
+- **Method:** `DELETE`
+- **Authorization:** Requires `ADMIN` role
+- **Description:** Deletes a role assigned to a user.
+- **Request Body:** 
+  - `AssignRoleDto`: Request containing role and username
+- **Response:** Returns a success message.
+
+
+
 ## Usage
 
 To run the project locally, follow these steps:
